@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "dgSpecHash": "E/SjE9BzMz0=",
+  "success": true,
+  "projectFilePath": "/home/baleygr/.dev/cloud-administration/scanly/api/ScanlyApi.csproj",
+  "expectedPackageFiles": [
+    "/home/baleygr/.nuget/packages/azure.ai.formrecognizer/4.1.0/azure.ai.formrecognizer.4.1.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/azure.core/1.41.0/azure.core.1.41.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/azure.identity/1.12.0/azure.identity.1.12.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/azure.storage.blobs/12.21.0/azure.storage.blobs.12.21.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/azure.storage.common/12.20.0/azure.storage.common.12.20.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/microsoft.aspnetcore.openapi/10.0.12/microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/microsoft.bcl.asyncinterfaces/1.1.1/microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/microsoft.identity.client/4.61.3/microsoft.identity.client.4.61.3.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/microsoft.identity.client.extensions.msal/4.61.3/microsoft.identity.client.extensions.msal.4.61.3.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/microsoft.identitymodel.abstractions/6.35.0/microsoft.identitymodel.abstractions.6.35.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/microsoft.openapi/2.12.0/microsoft.openapi.2.12.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/scalar.aspnetcore/2.17.4/scalar.aspnetcore.2.17.4.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/system.clientmodel/1.0.0/system.clientmodel.1.0.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/system.io.hashing/6.0.0/system.io.hashing.6.0.0.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/system.memory.data/1.0.2/system.memory.data.1.0.2.nupkg.sha512",
+    "/home/baleygr/.nuget/packages/system.security.cryptography.protecteddata/4.7.0/system.security.cryptography.protecteddata.4.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}

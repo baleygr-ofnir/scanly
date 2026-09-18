@@ -19,7 +19,9 @@ using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.OpenApi;
 using System.Text.Json;
+using Scalar.AspNetCore;
 
 var diEndpoint = Environment.GetEnvironmentVariable("AZURE_DI_ENDPOINT");
 var diKey      = Environment.GetEnvironmentVariable("AZURE_DI_KEY");
@@ -27,11 +29,17 @@ var storageUrl = Environment.GetEnvironmentVariable("AZURE_STORAGE_URL");
 var azureMode  = diEndpoint is not null && storageUrl is not null;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(o => o.SwaggerDoc("v1", new() { Title = "Scanly API", Version = "v1" }));
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
-app.UseSwagger();
-app.UseSwaggerUI();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
 
 // Azure-klienter — aktiveras automatiskt när miljövariablerna är satta
 DocumentAnalysisClient? diClient = null;
