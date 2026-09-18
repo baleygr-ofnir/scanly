@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+df14ae7ba2a392be6da219f98f027fc6c2015030")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f114423b9767616b0fa76a372aceb16c08c5cb9a")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

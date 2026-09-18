@@ -35,11 +35,8 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 // Azure-klienter — aktiveras automatiskt när miljövariablerna är satta
 DocumentAnalysisClient? diClient = null;
