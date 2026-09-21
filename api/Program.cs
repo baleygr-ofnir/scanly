@@ -23,12 +23,17 @@ using Microsoft.AspNetCore.OpenApi;
 using System.Text.Json;
 using Scalar.AspNetCore;
 
-var diEndpoint = Environment.GetEnvironmentVariable("AZURE_DI_ENDPOINT");
-var diKey      = Environment.GetEnvironmentVariable("AZURE_DI_KEY");
-var storageUrl = Environment.GetEnvironmentVariable("AZURE_STORAGE_URL");
-var azureMode  = diEndpoint is not null && storageUrl is not null;
+//var diEndpoint = Environment.GetEnvironmentVariable("AZURE_DI_ENDPOINT");
+//var diKey      = Environment.GetEnvironmentVariable("AZURE_DI_KEY");
+//var storageUrl = Environment.GetEnvironmentVariable("AZURE_STORAGE_URL");
 
 var builder = WebApplication.CreateBuilder(args);
+
+var diEndpoint = builder.Configuration.GetSection("AzureDI").GetValue<string>("Endpoint");
+var diKey = builder.Configuration.GetSection("AzureDI").GetValue<string>("Key");
+var storageUrl = builder.Configuration.GetSection("AzureStorage").GetValue<string>("Url");
+var azureMode  = diEndpoint is not null && storageUrl is not null;
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
