@@ -17,7 +17,7 @@
 
 - [x] Minst 4 endpoints implementerade och fungerande
 - [x] `GET /health` returnerar 200 OK
-- [ ] Swagger UI på `/swagger`
+- [x] Scalar UI
 - [x] Alla endpoints dokumenterade (`.WithTags()` + `.Produces<T>()`)
 
 ### Azure-tjänst i fokus
