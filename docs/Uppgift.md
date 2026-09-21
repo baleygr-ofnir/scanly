@@ -15,17 +15,17 @@
 
 ### API (minst 4 endpoints)
 
-- [ ] Minst 4 endpoints implementerade och fungerande
-- [ ] `GET /health` returnerar 200 OK
+- [x] Minst 4 endpoints implementerade och fungerande
+- [x] `GET /health` returnerar 200 OK
 - [ ] Swagger UI på `/swagger`
-- [ ] Alla endpoints dokumenterade (`.WithTags()` + `.Produces<T>()`)
+- [x] Alla endpoints dokumenterade (`.WithTags()` + `.Produces<T>()`)
 
 ### Azure-tjänst i fokus
 
-- [ ] Primär Azure-tjänst anropas korrekt (Document Intelligence / Computer Vision / AI Language, eller Blob Storage för scenario D)
-- [ ] Svar returneras strukturerat från API
-- [ ] **Managed Identity** för autentisering (ingen hårdkodad nyckel)
-- [ ] Resultat sparas i **Azure Blob Storage**
+- [x] Primär Azure-tjänst anropas korrekt (Document Intelligence / Computer Vision / AI Language, eller Blob Storage för scenario D)
+- [x] Svar returneras strukturerat från API
+- [x] **Managed Identity** för autentisering (ingen hårdkodad nyckel)
+- [x] Resultat sparas i **Azure Blob Storage**
 
 ### Infrastruktur (Bicep)
 
@@ -35,8 +35,8 @@
 
 ### Containerisering
 
-- [ ] Appen körs i Docker
-- [ ] Multi-stage Dockerfile (builder + runtime)
+- [x] Appen körs i Docker
+- [x] Multi-stage Dockerfile (builder + runtime)
 - [ ] Image pushad till Azure Container Registry (ACR)
 
 ### Driftsättning
