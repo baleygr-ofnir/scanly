@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("b993cc70-c8b8-4a02-99b5-77056bb53b2e")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f114423b9767616b0fa76a372aceb16c08c5cb9a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28949de4b8a8a55115a1ccd2bf829939613c2851")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
