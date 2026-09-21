@@ -1,0 +1,77 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  # Byt ut dessa mot dina faktiska värden!
+  azureServiceConnection: 'min-azure-service-connection' # Namnet på din Service Connection i Azure DevOps
+  resourceGroupName: 'min-resource-group'
+  containerRegistryName: 'minacr.azurecr.io' # Hela login-servern för ACR
+  containerRegistryConnection: 'min-acr-service-connection' # Namn på Docker Registry service connection i DevOps
+  imageRepository: 'scanly-api'
+  containerAppName: 'scanly-app'
+  dockerfilePath: 'api/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: 'Build .NET API'
+  jobs:
+  - job: Build
+    displayName: 'Build .NET API'
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore packages'
+      inputs:
+        command: 'restore'
+        projects: 'api/**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build API'
+      inputs:
+        command: 'build'
+        projects: 'api/**/*.csproj'
+        arguments: '--configuration Release'
+
+- stage: BuildAndPushImage
+  displayName: 'Build and Push Docker Image'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: Docker
+    displayName: 'Build & Push to ACR'
+    steps:
+    - task: Docker@2
+      displayName: 'Build and push Docker image'
+      inputs:
+        command: 'buildAndPush'
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(containerRegistryConnection)
+        tags: |
+          $(tag)
+          latest
+
+- stage: Deploy
+  displayName: 'Deploy to Container Apps'
+  dependsOn: BuildAndPushImage
+  condition: succeeded()
+  jobs:
+  - job: DeployContainerApp
+    displayName: 'Update Container App Image'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Deploy to Azure Container Apps'
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az containerapp update \
+            --name $(containerAppName) \
+            --resource-group $(resourceGroupName) \
+            --image $(containerRegistryName)/$(imageRepository):$(tag)
