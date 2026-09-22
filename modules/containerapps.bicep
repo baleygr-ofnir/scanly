@@ -74,7 +74,7 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'api'
           image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          env: [
+          env: empty(keyVaultSecretUri) ? [] : [
             {
               name: 'AzureDi__Endpoint'
               secretRef: 'azure-di-endpoint'

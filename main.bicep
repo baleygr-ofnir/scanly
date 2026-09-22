@@ -8,7 +8,6 @@ param azureDiKey string
 
 var uniqueStr = uniqueString(resourceGroup().id)
 var storageName = 'stscanly${uniqueStr}'
-var diName = 'di-scanly-${uniqueStr}'
 var acrName = 'acrscanly${uniqueStr}'
 var envName = 'cae-scanly-${uniqueStr}'
 var appName = 'ca-scanly-api'
@@ -71,14 +70,10 @@ resource acrRef 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
 resource storageRef 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: storageName
 }
-resource diRef 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: diName
-}
 
 // Inbyggda Role Definition IDs i Azure
 var acrPullRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
 var blobDataContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
-var cognitiveServicesUserRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
 
 // 1. Ge Container Appen behörighet att hämta (pull) images från ACR
 resource assignAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
