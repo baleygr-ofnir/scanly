@@ -1,12 +1,18 @@
 param location string = 'westeurope'
+@secure()
+param azureDiEndpoint string
+@secure()
+param azureDiKey string
 
 // Generera unika namn baserat på resursgruppen för att undvika namnkrockar
+
 var uniqueStr = uniqueString(resourceGroup().id)
 var storageName = 'stscanly${uniqueStr}'
 var diName = 'di-scanly-${uniqueStr}'
 var acrName = 'acrscanly${uniqueStr}'
 var envName = 'cae-scanly-${uniqueStr}'
 var appName = 'ca-scanly-api'
+var vaultName = 'kv-scanly-${uniqueStr}'
 
 module storage 'modules/storage.bicep' = {
   name: 'storageDeploy'
@@ -41,6 +47,18 @@ module containerApp 'modules/containerapps.bicep' = {
     registryLoginServer: acr.outputs.registryLoginServer
     storageUrl: storage.outputs.storageAccountUrl
     diEndpoint: di.outputs.cognitiveServicesEndpoint
+    
+  }
+}
+module keyVault 'modules/keyvault.bicep' = {
+  name: 'keyVaultDeploy'
+  params: {
+    containerAppPrincipalId: containerApp.outputs.principalId 
+    location: location
+    vaultName: vaultName
+    azureDiEndpoint: azureDiEndpoint
+    azureDiKey: azureDiKey
+    azureStorageUrl: storage.outputs.storageAccountUrl
   }
 }
 

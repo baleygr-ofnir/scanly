@@ -80,3 +80,4 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
 
 output principalId string = app.identity.principalId
 output appUrl string = app.properties.configuration.ingress.fqdn
+
