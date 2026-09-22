@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28949de4b8a8a55115a1ccd2bf829939613c2851")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b0d3ed93c92612348270972f55e9820edeb71024")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScanlyApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

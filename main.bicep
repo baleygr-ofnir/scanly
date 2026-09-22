@@ -22,14 +22,6 @@ module storage 'modules/storage.bicep' = {
   }
 }
 
-module di 'modules/documentintelligence.bicep' = {
-  name: 'diDeploy'
-  params: {
-    location: location
-    accountName: diName
-  }
-}
-
 module acr 'modules/containerregistry.bicep' = {
   name: 'acrDeploy'
   params: {
@@ -45,9 +37,6 @@ module containerApp 'modules/containerapps.bicep' = {
     envName: envName
     appName: appName
     registryLoginServer: acr.outputs.registryLoginServer
-    storageUrl: storage.outputs.storageAccountUrl
-    diEndpoint: di.outputs.cognitiveServicesEndpoint
-    
   }
 }
 module keyVault 'modules/keyvault.bicep' = {
@@ -59,6 +48,17 @@ module keyVault 'modules/keyvault.bicep' = {
     azureDiEndpoint: azureDiEndpoint
     azureDiKey: azureDiKey
     azureStorageUrl: storage.outputs.storageAccountUrl
+  }
+}
+
+module containerAppSettings 'modules/containerapps.bicep' = {
+  name: 'containerAppSettingsUpdate'
+  params: {
+    appName: appName
+    envName: envName
+    location: location
+    registryLoginServer: acr.outputs.registryLoginServer
+    keyVaultSecretUri: keyVault.outputs.keyVaultUri
   }
 }
 
@@ -82,8 +82,11 @@ var cognitiveServicesUserRoleId = subscriptionResourceId('Microsoft.Authorizatio
 
 // 1. Ge Container Appen behörighet att hämta (pull) images från ACR
 resource assignAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(acrRef.id, containerApp.outputs.principalId, acrPullRoleId)
+  name: guid(acrRef.id, appName, acrPullRoleId)
   scope: acrRef
+  dependsOn: [
+    acr
+  ]
   properties: {
     principalId: containerApp.outputs.principalId
     roleDefinitionId: acrPullRoleId
@@ -93,22 +96,14 @@ resource assignAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 // 2. Ge Container Appen behörighet att läsa/skriva blobbar i Storage Account
 resource assignBlobContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageRef.id, containerApp.outputs.principalId, blobDataContributorRoleId)
+  name: guid(storageRef.id, appName, blobDataContributorRoleId)
   scope: storageRef
+  dependsOn: [
+    storage
+  ]
   properties: {
     principalId: containerApp.outputs.principalId
     roleDefinitionId: blobDataContributorRoleId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// 3. Ge Container Appen behörighet att använda Document Intelligence API:et
-resource assignCognitiveUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(diRef.id, containerApp.outputs.principalId, cognitiveServicesUserRoleId)
-  scope: diRef
-  properties: {
-    principalId: containerApp.outputs.principalId
-    roleDefinitionId: cognitiveServicesUserRoleId
     principalType: 'ServicePrincipal'
   }
 }
