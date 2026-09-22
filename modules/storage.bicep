@@ -30,3 +30,4 @@ resource invoicesContainer 'Microsoft.Storage/storageAccounts/blobServices/conta
 output storageAccountId string = storageAccount.id
 output storageAccountName string = storageAccount.name
 output storageAccountUrl string = storageAccount.properties.primaryEndpoints.blob
+
