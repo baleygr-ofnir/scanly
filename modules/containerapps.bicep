@@ -2,10 +2,7 @@ param location string = 'westeurope'
 param envName string
 param appName string
 param registryLoginServer string
-param storageUrl string
-param diEndpoint string
-@secure()
-param diKey string
+param keyVaultSecretUri string = ''
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${envName}-law'
@@ -51,10 +48,21 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
           identity: 'system'
         }
       ]
-      secrets: [
+      secrets: empty(keyVaultSecretUri) ? [] : [
         {
-          name: 'di-key'
-          value: diKey
+          name: 'azure-di-endpoint'
+          keyVaultUrl: '${keyVaultSecretUri}secrets/AzureDiEndpoint'
+          identity: 'System'
+        }
+        {
+          name: 'azure-di-key'
+          keyVaultUrl: '${keyVaultSecretUri}secrets/AzureDiKey'
+          identity: 'System'
+        }
+        {
+          name: 'azure-storage-url'
+          keyVaultUrl: '${keyVaultSecretUri}secrets/AzureStorageUrl'
+          identity: 'System'
         }
       ]
     }
@@ -66,18 +74,18 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'api'
           image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          env: [
+          env: empty(keyVaultSecretUri) ? [] : [
             {
               name: 'AzureDI__Endpoint'
-              value: diEndpoint
+              secretRef: 'azure-di-endpoint'
             }
             {
               name: 'AzureDI__Key'
-              secretRef: 'di-key'
+              secretRef: 'azure-di-key'
             }
             {
               name: 'AzureStorage__Url'
-              value: storageUrl
+              secretRef: 'azure-storage-url'
             }
           ]
           resources: {
@@ -92,4 +100,3 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
 
 output principalId string = app.identity.principalId
 output appUrl string = app.properties.configuration.ingress.fqdn
-

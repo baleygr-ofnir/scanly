@@ -36,9 +36,7 @@ module containerApp 'modules/containerapps.bicep' = {
     envName: envName
     appName: appName
     registryLoginServer: acr.outputs.registryLoginServer
-    storageUrl: storage.outputs.storageAccountUrl
-    diEndpoint: azureDiEndpoint
-    diKey: azureDiKey
+
   }
 }
 module keyVault 'modules/keyvault.bicep' = {
@@ -50,6 +48,17 @@ module keyVault 'modules/keyvault.bicep' = {
     azureDiEndpoint: azureDiEndpoint
     azureDiKey: azureDiKey
     azureStorageUrl: storage.outputs.storageAccountUrl
+  }
+}
+
+module containerAppSettings 'modules/containerapps.bicep' = {
+  name: 'containerAppSettingsUpdate'
+  params: {
+    appName: appName
+    envName: envName
+    location: location
+    registryLoginServer: acr.outputs.registryLoginServer
+    keyVaultSecretUri: keyVault.outputs.keyVaultUri
   }
 }
 
@@ -71,6 +80,9 @@ var blobDataContributorRoleId = subscriptionResourceId('Microsoft.Authorization/
 resource assignAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acrRef.id, appName, acrPullRoleId)
   scope: acrRef
+  dependsOn: [
+    acr
+  ]
   properties: {
     principalId: containerApp.outputs.principalId
     roleDefinitionId: acrPullRoleId
@@ -82,6 +94,9 @@ resource assignAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 resource assignBlobContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storageRef.id, appName, blobDataContributorRoleId)
   scope: storageRef
+  dependsOn: [
+    storage
+  ]
   properties: {
     principalId: containerApp.outputs.principalId
     roleDefinitionId: blobDataContributorRoleId
