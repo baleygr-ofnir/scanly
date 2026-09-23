@@ -53,6 +53,10 @@ module keyVault 'modules/keyvault.bicep' = {
 
 module containerAppSettings 'modules/containerapps.bicep' = {
   name: 'containerAppSettingsUpdate'
+  dependsOn: [
+    assignAcrPull
+    assignBlobContributor
+  ]
   params: {
     appName: appName
     envName: envName

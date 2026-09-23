@@ -3,6 +3,7 @@ param envName string
 param appName string
 param registryLoginServer string
 param keyVaultSecretUri string = ''
+param imageName string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${envName}-law'
@@ -42,7 +43,7 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 8080
       }
-      registries: [
+      registries: empty(keyVaultSecretUri) ? [] : [
         {
           server: registryLoginServer
           identity: 'system'
@@ -73,7 +74,7 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         {
           name: 'api'
-          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imageName
           env: empty(keyVaultSecretUri) ? [] : [
             {
               name: 'AzureDI__Endpoint'
