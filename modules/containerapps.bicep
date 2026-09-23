@@ -2,8 +2,8 @@ param location string = 'westeurope'
 param envName string
 param appName string
 param registryLoginServer string
-param storageUrl string
-param diEndpoint string
+param keyVaultSecretUri string = ''
+param imageName string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${envName}-law'
@@ -43,10 +43,27 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 8080
       }
-      registries: [
+      registries: empty(keyVaultSecretUri) ? [] : [
         {
           server: registryLoginServer
           identity: 'system'
+        }
+      ]
+      secrets: empty(keyVaultSecretUri) ? [] : [
+        {
+          name: 'azure-di-endpoint'
+          keyVaultUrl: '${keyVaultSecretUri}secrets/AzureDiEndpoint'
+          identity: 'System'
+        }
+        {
+          name: 'azure-di-key'
+          keyVaultUrl: '${keyVaultSecretUri}secrets/AzureDiKey'
+          identity: 'System'
+        }
+        {
+          name: 'azure-storage-url'
+          keyVaultUrl: '${keyVaultSecretUri}secrets/AzureStorageUrl'
+          identity: 'System'
         }
       ]
     }
@@ -57,15 +74,19 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         {
           name: 'api'
-          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          env: [
+          image: imageName
+          env: empty(keyVaultSecretUri) ? [] : [
             {
-              name: 'AZURE_DI_ENDPOINT'
-              value: diEndpoint
+              name: 'AzureDI__Endpoint'
+              secretRef: 'azure-di-endpoint'
             }
             {
-              name: 'AZURE_STORAGE_URL'
-              value: storageUrl
+              name: 'AzureDI__Key'
+              secretRef: 'azure-di-key'
+            }
+            {
+              name: 'AzureStorage__Url'
+              secretRef: 'azure-storage-url'
             }
           ]
           resources: {
@@ -80,4 +101,3 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
 
 output principalId string = app.identity.principalId
 output appUrl string = app.properties.configuration.ingress.fqdn
-

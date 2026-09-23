@@ -55,8 +55,3 @@ resource azureStorageUrlSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = 
   }
 }
 output keyVaultUri string = keyVault.properties.vaultUri
-output azureDiEndpointSecretUri string = azureDiEndpointSecret.properties.secretUriWithVersion
-output azureKeySecretUri string = azureKeySecret.properties.secretUriWithVersion
-output azureStorageUrlSecretUri string = azureStorageUrlSecret.properties.secretUriWithVersion
-
-
