@@ -4,6 +4,8 @@ param appName string
 param registryLoginServer string
 param storageUrl string
 param diEndpoint string
+@secure()
+param diKey string
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${envName}-law'
@@ -49,6 +51,12 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
           identity: 'system'
         }
       ]
+      secrets: [
+        {
+          name: 'di-key'
+          value: diKey
+        }
+      ]
     }
     template: {
       scale: {
@@ -60,11 +68,15 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
           image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           env: [
             {
-              name: 'AZURE_DI_ENDPOINT'
+              name: 'AzureDI__Endpoint'
               value: diEndpoint
             }
             {
-              name: 'AZURE_STORAGE_URL'
+              name: 'AzureDI__Key'
+              secretRef: 'di-key'
+            }
+            {
+              name: 'AzureStorage__Url'
               value: storageUrl
             }
           ]
