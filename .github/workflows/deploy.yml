@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'api/**'
-      - '.github/workflows/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 env:

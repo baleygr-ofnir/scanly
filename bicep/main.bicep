@@ -84,9 +84,6 @@ var blobDataContributorRoleId = subscriptionResourceId('Microsoft.Authorization/
 resource assignAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acrRef.id, appName, acrPullRoleId)
   scope: acrRef
-  dependsOn: [
-    acr
-  ]
   properties: {
     principalId: containerApp.outputs.principalId
     roleDefinitionId: acrPullRoleId
