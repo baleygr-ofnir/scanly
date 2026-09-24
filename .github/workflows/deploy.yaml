@@ -6,17 +6,17 @@ on:
       - main
     paths:
       - 'api/**'
-      - '.github/workflows/deploy.yml'
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+      - '.github/workflows/deploy.yaml'
+  workflow_dispatch:
 
 env:
-  RESOURCE_GROUP: "RG-Jack-Reveny-5e257d-DotNetCloudDeveloper-VT-Mars-Goteborg"
-  ACR_NAME: "acrscanlyiqahsyc4gnwrs" # Byt ut detta om ditt ACR-namn ändras
-  CONTAINER_APP_NAME: "ca-scanly-api"
-  IMAGE_NAME: "scanly/api"
+  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+  ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+  CONTAINER_APP_NAME: ${{ vars.AZURE_CONTAINER_APP_NAME }}
+  IMAGE_NAME: "scanly/api" 
 
 permissions:
-  id-token: write # Krävs för OIDC-inloggning mot Azure
+  id-token: write 
   contents: read
 
 jobs:
@@ -33,18 +33,6 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      # (Frivilligt) Deploya Infrastrukturen via Bicep varje gång
-      # Om du avkommenterar detta måste du lägga till dina hemligheter i GitHub Secrets
-      # - name: Deploy Infrastructure (Bicep)
-      #   uses: azure/CLI@v2
-      #   with:
-      #     azcliversion: latest
-      #     inlineScript: |
-      #       az deployment group create \
-      #         --resource-group ${{ env.RESOURCE_GROUP }} \
-      #         --template-file ./main.bicep \
-      #         --parameters azureDiEndpoint="${{ secrets.AZURE_DI_ENDPOINT }}" azureDiKey="${{ secrets.AZURE_DI_KEY }}"
 
       - name: Log in to Azure Container Registry
         run: az acr login --name ${{ env.ACR_NAME }}
