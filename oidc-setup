@@ -3,7 +3,8 @@
 rg_name=$1
 acr_name=$2
 ca_name=$3
-repo=$4
+github_owner=$4
+repo_name=$5
 
 sub_id=$(az account show --query id -o tsv)
 tenant_id=$(az account show --query tenantId -o tsv)
@@ -44,11 +45,16 @@ az role assignment create \
     --role AcrPull \
     --scope $acr_id
 
+owner_id=$(gh api repos/$github_owner/$repo_name -q '.owner.id')
+repo_id=$(gh api repos/$github_owner/$repo_name -q '.id')
+
+subject="repo:${github_owner}@${owner_id}/${repo_name}@${repo_id}:ref:refs/heads/main"
+
 cat<<EOF > credentials.json
 {
     "name": "GitHub-OIDC-Main",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:$repo:ref:refs/heads/main",
+    "subject": "$subject",
     "audiences": ["api://AzureADTokenExchange"]
 }
 EOF
