@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'api/**'
-      - '.github/workflows/deploy.yml'
+      - '.github/workflows/deploy.yaml'
   workflow_dispatch:
 
 env:
