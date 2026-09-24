@@ -1,0 +1,62 @@
+#!/bin/bash
+
+rg_name=$1
+acr_name=$2
+ca_name=$3
+repo=$4
+
+sub_id=$(az account show --query id -o tsv)
+tenant_id=$(az account show --query tenantId -o tsv)
+
+deploy_app_id=$(az ad app create --display-name GitHubActions-Deploy --query appId --output tsv)
+deploy_obj_id=$(az ad app show --id $deploy_app_id --query id --output tsv)
+deploy_sp_id=$(az ad sp create --id $deploy_app_id --query id --output tsv)
+
+acr_id=$(az acr show --name $acr_name --resource-group $rg_name --query id --output tsv)
+ca_id=$(az containerapp show --name $ca_name --resource-group $rg_name --query id --output tsv)
+
+az role assignment create \
+    --assignee-object-id $deploy_sp_id \
+    --assignee-principal-type ServicePrincipal \
+    --role AcrPush \
+    --scope $acr_id
+
+az role assignment create \
+    --assignee-object-id $deploy_sp_id \
+    --assignee-principal-type ServicePrincipal \
+    --role Contributor \
+    --scope $ca_id
+
+az containerapp identity assign \
+    --name $ca_name \
+    --resource-group $rg_name \
+    --system-assigned
+
+ca_principal_id=$(az containerapp show \
+    --name $ca_name \
+    --resource-group $rg_name \
+    --query identity.principalId \
+    --output tsv)
+
+az role assignment create \
+    --assignee-object-id $ca_principal_id \
+    --assignee-principal-type ServicePrincipal \
+    --role AcrPull \
+    --scope $acr_id
+
+cat<<EOF > credentials.json
+{
+    "name": "GitHub-OIDC-Main",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subject": "repo:$repo:ref:refs/heads/main",
+    "audiences": ["api://AzureADTokenExchange"]
+}
+EOF
+
+az ad app federated-credential create \
+    --id $deploy_obj_id \
+    --parameters @credentials.json
+
+gh secret set AZURE_CLIENT_ID --body $deploy_app_id --repo $repo
+gh secret set AZURE_TENANT_ID --body $tenant_id --repo $repo
+gh secret set AZURE_SUBSCRIPTION_ID --body $sub_id --repo $repo
