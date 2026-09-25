@@ -17,7 +17,7 @@
 
 - [x] Minst 4 endpoints implementerade och fungerande
 - [x] `GET /health` returnerar 200 OK
-- [x] Scalar UI
+- *[x] Scalar UI > Kika om problem
 - [x] Alla endpoints dokumenterade (`.WithTags()` + `.Produces<T>()`)
 
 ### Azure-tjänst i fokus
@@ -29,42 +29,51 @@
 
 ### Infrastruktur (Bicep)
 
-- [ ] Alla resurser i Bicep (deployas in i befintlig resource group)
-- [ ] Minst: ACR + Container Apps Environment + Container App + Storage Account
-- [ ] `az deployment group what-if` fungerar utan fel
+- [x] Alla resurser i Bicep (deployas in i befintlig resource group)
+- [x] Minst: ACR + Container Apps Environment + Container App + Storage Account
+- [x] `az deployment group what-if` fungerar utan fel
 
 ### Containerisering
 
 - [x] Appen körs i Docker
 - [x] Multi-stage Dockerfile (builder + runtime)
-- [ ] Image pushad till Azure Container Registry (ACR)
+- [x] Image pushad till Azure Container Registry (ACR)
 
 ### Driftsättning
 
-- [ ] Container App deployad från ACR-imagen
-- [ ] Minst 2 replicas (min-replicas i Bicep)
-- [ ] Appen svarar på publik URL
+- [x] Container App deployad från ACR-imagen
+- [x] Minst 2 replicas (min-replicas i Bicep)
+- [x] Appen svarar på publik URL
 
 ### CI/CD (Azure DevOps)
 
-- [ ] YAML-pipeline triggas automatiskt vid push till `main`
+- [x] YAML-pipeline triggas automatiskt vid push till `main`
 - [ ] Pipeline-steg: build → test → push till ACR → deploy till Container Apps
-- [ ] Grön pipeline = live app
+- [x] Grön pipeline = live app
 
 ### Säkerhet
 
-- [ ] Inga hårdkodade credentials i koden
-- [ ] Pipeline-secrets + environment variables
-- [ ] Managed Identity för all Azure-åtkomst
-- [ ] Inga hemliga nycklar i git-historiken
+- [x] Inga hårdkodade credentials i koden
+- [x] Pipeline-secrets + environment variables
+- [x] Managed Identity för all Azure-åtkomst
+- [x] Inga hemliga nycklar i git-historiken
 
 ### Dokumentation (ARCHITECTURE.md)
 
 - [ ] Svar på alla 5 arkitekturfrågor:
-  - [ ] Varför Container Apps (inte AKS)?
+  - [x] Varför Container Apps (inte AKS)?
+        Vi har inte tillgång till AKS...
   - [ ] CI/CD-flöde steg för steg
+        Checkout code
+          > Azure Login
+            > ACR Login
+              > Build Docker
+                > Push Docker to ACR
+                  > Update Container App
   - [ ] Varför Bicep (IaC)?
+        För att ha en redo infrastruktur för enkel uppskalning eller eventuell migration.
   - [ ] Hur hanteras hemligheter?
+        GitHub Actions Secrets och Environment Variables
   - [ ] Ekonomi med faktiska siffror
 
 ---
@@ -72,7 +81,7 @@
 ## VG-krav — Minst 3 av dessa
 
 - [ ] **Autoskalning**: HTTP-baserade scaling rules (t.ex. >10 simultana requests)
-- [ ] **Monitoring**: Application Insights + minst ett custom alert (t.ex. alert vid fel > 5%)
+- [x] **Monitoring**: Application Insights + minst ett custom alert (t.ex. alert vid fel > 5%)
 - [ ] **Parametriserad Bicep**: parameter-fil för dev/prod (replicas, SKU osv.)
 - [ ] **Felhantering**: Tydliga API-svar + HTTP-statuskoder + loggning när Azure-tjänsten misslyckas
 - [ ] **Rollback**: Dokumenterad och demonstrerad (re-deploy av tidigare Container App revision)
@@ -82,8 +91,8 @@
 
 ## Leverabler
 
-- [ ] **Git-repo** (Azure DevOps eller GitHub) — länk till Marcus senast torsdag 2 okt kl. 23:59
-- [ ] **Presentation** (10/12/15 min) — fredag 3 okt online
+- [ ] **Git-repo** (Azure DevOps eller GitHub) — länk till Marcus senast torsdag 1 okt kl. 23:59
+- [ ] **Presentation** (10/12/15 min) — fredag 2 okt online
 - [ ] **Commit-historik** — visar arbete, alla teammedlemmar har commits
 - [ ] **RAPPORT.md** — kundrapport baserad på mallen
 - [ ] **REFLEKTION_[namn].md** — individuell reflektion per person
