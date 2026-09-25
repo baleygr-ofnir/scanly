@@ -20,6 +20,7 @@ using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Text.Json;
 using Scalar.AspNetCore;
 
@@ -37,9 +38,16 @@ var azureMode  = diEndpoint is not null && storageUrl is not null;
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.All;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
 app.MapOpenApi();
 app.MapScalarApiReference();
 
