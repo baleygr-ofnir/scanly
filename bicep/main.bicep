@@ -1,8 +1,8 @@
 param location string = 'westeurope'
 @secure()
-param azureDiEndpoint string
+param azureDiEndpoint string = readEnvironmentVariable('AZURE_DI_ENDPOINT')
 @secure()
-param azureDiKey string
+param azureDiKey string = readEnvironmentVariable('AZURE_DI_KEY')
 
 // Generera unika namn baserat på resursgruppen för att undvika namnkrockar
 
