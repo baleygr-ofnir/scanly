@@ -22,15 +22,16 @@ on:
 permissions:
   id-token: write
   contents: read
+  
+env:
+  TARGET_ENV: ${{ inputs.environment || 'dev' }}
+  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'dev' }}
-    env:
-      IMAGE_NAME: scanly-api
-      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout Code
@@ -46,34 +47,44 @@ jobs:
     - name: Deploy Core Infrastructure
       uses: azure/arm-deploy@v2
       id: bicep-core
+      env:
+        AZURE_DI_ENDPOINT: ${{ secrets.AZURE_DI_ENDPOINT }}
+        AZURE_DI_KEY: ${{ secrets.AZURE_DI_KEY }}
       with:
         scope: resourcegroup
-        resourceGroupName: rg-scanly-${{ inputs.environment || 'dev' }}
+        resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
         template: ./bicep/main.bicep
+        parameters: ./bicep/parameters/${{ env.TARGET_ENV }}.bicepparam
         failOnStdErr: false
+
+    - name: Set Image Reference Variable
+      run: |
+        echo "FULL_IMAGE_NAME=${{ steps.bicep-core.outputs.acrLoginServer }}/${{ vars.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
 
     - name: Authenticate to ACR
-      run: |
-        ACR_NAME=$(echo '${{ steps.bicep-core.outputs.acrName }}' | tr -d '"')
-        az acr login --name $ACR_NAME
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          ACR_NAME=$(echo '${{ steps.bicep-core.outputs.acrLoginServer }}' | cut -d'.' -f1)
+          az acr login --name $ACR_NAME
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
 
     - name: Build and Push .NET 10 API Image
-      run: |
-        ACR_NAME=$(echo '${{ steps.bicep-core.outputs.acrName }}' | tr -d '"')
-        ACR_LOGIN_SERVER="${ACR_NAME}.azurecr.io"
-        FULL_IMAGE_NAME="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
-
-        docker build -t $FULL_IMAGE_NAME ./api
-        docker push $FULL_IMAGE_NAME
+      uses: docker/build-push-action@v7
+      with:
+        context: ./api
+        push: true
+        tags: ${{ env.FULL_IMAGE_NAME }}
 
     - name: Deploy Azure Container App
-      uses: azure/arm-deploy@v2
+      uses: azure/cli@v2
       with:
-        scope: resourcegroup
-        resourceGroupName: rg-scanly-${{ inputs.environment || 'dev' }}
-        template: ./bicep/modules/containerapps.bicep
-        parameters: >
-          containerRegistryName:${{ steps.bicep-core.outputs.acrName }}
-          imageName=$IMAGE_NAME
-          imageTag=$IMAGE_TAG
-        failOnStdErr: false
+        azcliversion: latest
+        inlineScript: |
+          az containerapp update \
+            --name ca-scanly-api \
+            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }}
+            --image ${{ env.FULL_IMAGE_NAME }}
