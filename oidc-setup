@@ -14,7 +14,7 @@ deploy_obj_id=$(az ad app show --id $deploy_app_id --query id --output tsv)
 deploy_sp_id=$(az ad sp create --id $deploy_app_id --query id --output tsv)
 
 acr_id=$(az acr show --name $acr_name --resource-group $rg_name --query id --output tsv)
-ca_id=$(az containerapp show --name $ca_name --resource-group $rg_name --query id --output tsv)
+rg_id=$(az group show --name $rg_name --query id --output tsv)
 
 az role assignment create \
     --assignee-object-id $deploy_sp_id \
@@ -26,7 +26,13 @@ az role assignment create \
     --assignee-object-id $deploy_sp_id \
     --assignee-principal-type ServicePrincipal \
     --role Contributor \
-    --scope $ca_id
+    --scope $rg_id
+
+az role assignment create \
+    --assignee-object-id $deploy_sp_id \
+    --assignee-principal-type ServicePrincipal \
+    --role "Role Based Access Control Administrator" \
+    --scope $rg_id
 
 az containerapp identity assign \
     --name $ca_name \
