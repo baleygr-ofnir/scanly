@@ -1,17 +1,79 @@
-name: Deploy Infrastructure
+name: Deploy Infrastructure and API with Bicep
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'api/**'
       - '.github/workflows/bicep.yaml'
+      - 'bicep/**'
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+          - test
 
 permissions:
-    id-token: write
-    contents: read
+  id-token: write
+  contents: read
 
 jobs:
-  
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    env:
+      IMAGE_NAME: scanly-api
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+    - name: Azure Login via OIDC
+      uses: azure/login@v3
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    
+    - name: Deploy Core Infrastructure
+      uses: azure/arm-deploy@v2
+      id: bicep-core
+      with:
+        scope: resourcegroup
+        resourceGroupName: rg-scanly-${{ inputs.environment || 'dev' }}
+        template: ./bicep/main.bicep
+        failOnStdErr: false
+
+    - name: Authenticate to ACR
+      run: |
+        ACR_NAME=$(echo '${{ steps.bicep-core.outputs.acrName }}' | tr -d '"')
+        az acr login --name $ACR_NAME
+
+    - name: Build and Push .NET 10 API Image
+      run: |
+        ACR_NAME=$(echo '${{ steps.bicep-core.outputs.acrName }}' | tr -d '"')
+        ACR_LOGIN_SERVER="${ACR_NAME}.azurecr.io"
+        FULL_IMAGE_NAME="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+        docker build -t $FULL_IMAGE_NAME ./api
+        docker push $FULL_IMAGE_NAME
+
+    - name: Deploy Azure Container App
+      uses: azure/arm-deploy@v2
+      with:
+        scope: resourcegroup
+        resourceGroupName: rg-scanly-${{ inputs.environment || 'dev' }}
+        template: ./bicep/modules/containerapps.bicep
+        parameters: >
+          containerRegistryName:${{ steps.bicep-core.outputs.acrName }}
+          imageName=$IMAGE_NAME
+          imageTag=$IMAGE_TAG
+        failOnStdErr: false
