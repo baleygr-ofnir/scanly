@@ -151,3 +151,6 @@ static FakturaResultat ParseFaktura(AnalyzedDocument? doc, string id)
 // ── Modeller ─────────────────────────────────────────────────────
 record FakturaResultat(string Id, string Leverantor, decimal Totalbelopp,
     string Forfallodatum, string Valuta, string Status);
+
+// Test
+public partial class Program { } // för integrationstestning med WebApplicationFactory
