@@ -1,17 +1,22 @@
-param location string = 'westeurope'
-@secure()
-param azureDiEndpoint string = readEnvironmentVariable('AZURE_DI_ENDPOINT')
-@secure()
-param azureDiKey string = readEnvironmentVariable('AZURE_DI_KEY')
+@description('The environment name (e.g., dev, test, prod)')
+param environmentName string
 
-// Generera unika namn baserat på resursgruppen för att undvika namnkrockar
+@description('The Azure region where resources will be deployed')
+param location string = resourceGroup().location
 
-var uniqueStr = uniqueString(resourceGroup().id)
-var storageName = 'stscanly${uniqueStr}'
-var acrName = 'acrscanly${uniqueStr}'
-var envName = 'cae-scanly-${uniqueStr}'
-var appName = 'ca-scanly-api'
-var vaultName = 'kv-scanly-${uniqueStr}'
+@secure()
+param azureDiEndpoint string
+
+@secure()
+param azureDiKey string
+
+// Generera unika namn baserat på resursgruppen och miljön för att undvika namnkrockar
+var uniqueStr = take(uniqueString(resourceGroup().id, environmentName), 6)
+var storageName = 'stscanly${environmentName}${uniqueStr}'
+var acrName = 'acrscanly${environmentName}${uniqueStr}'
+var envName = 'cae-scanly-${environmentName}-${uniqueStr}'
+var appName = 'ca-scanly-api-${environmentName}'
+var vaultName = 'kv-scanly-${environmentName}-${uniqueStr}'
 
 module storage 'modules/storage.bicep' = {
   name: 'storageDeploy'

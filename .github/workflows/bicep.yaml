@@ -85,6 +85,6 @@ jobs:
         azcliversion: latest
         inlineScript: |
           az containerapp update \
-            --name ca-scanly-api \
-            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }}
+            --name ca-scanly-api-${{ env.TARGET_ENV }} \
+            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
             --image ${{ env.FULL_IMAGE_NAME }}
