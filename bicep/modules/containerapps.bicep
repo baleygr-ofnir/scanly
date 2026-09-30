@@ -5,6 +5,16 @@ param registryLoginServer string
 param keyVaultSecretUri string = ''
 param imageName string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
+@description('Minimum number of replicas. 0 allows scale-to-zero in dev to save cost.')
+@minValue(0)
+param minReplicas int = 1
+
+@description('vCPU allocation per replica (e.g. 0.25, 0.5, 1.0).')
+param containerCpu string = '0.25'
+
+@description('Memory allocation per replica (e.g. 0.5Gi, 1Gi, 2Gi).')
+param containerMemory string = '0.5Gi'
+
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${envName}-law'
   location: location
@@ -69,7 +79,7 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
     }
     template: {
       scale: {
-        minReplicas: 2
+        minReplicas: minReplicas
       }
       containers: [
         {
@@ -90,8 +100,8 @@ resource app 'Microsoft.App/containerApps@2023-05-01' = {
             }
           ]
           resources: {
-            cpu: json('0.25')
-            memory: '0.5Gi'
+            cpu: json(containerCpu)
+            memory: containerMemory
           }
         }
       ]

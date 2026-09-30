@@ -19,6 +19,7 @@ using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Text.Json;
@@ -33,7 +34,7 @@ var builder = WebApplication.CreateBuilder(args);
 var diEndpoint = builder.Configuration.GetSection("AzureDI").GetValue<string>("Endpoint");
 var diKey = builder.Configuration.GetSection("AzureDI").GetValue<string>("Key");
 var storageUrl = builder.Configuration.GetSection("AzureStorage").GetValue<string>("Url");
-var azureMode  = diEndpoint is not null && storageUrl is not null;
+var azureMode  = !string.IsNullOrWhiteSpace(diEndpoint) && !string.IsNullOrWhiteSpace(storageUrl);
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -46,6 +47,16 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var app = builder.Build();
+
+// Global exception handler — returns a structured JSON error instead of an HTML stack trace
+app.UseExceptionHandler(errApp => errApp.Run(async ctx =>
+{
+    ctx.Response.StatusCode  = StatusCodes.Status500InternalServerError;
+    ctx.Response.ContentType = "application/json";
+    var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+    var msg = app.Environment.IsDevelopment() ? ex?.ToString() : "Ett oväntat fel inträffade.";
+    await ctx.Response.WriteAsJsonAsync(new { fel = msg });
+}));
 
 app.UseForwardedHeaders();
 app.MapOpenApi();
@@ -65,7 +76,7 @@ if (azureMode)
 }
 
 // In-memory cache (demo-lägets enda lagring, Azure-lägets snabbcache)
-var fakturor = new Dictionary<string, FakturaResultat>();
+var fakturor = new System.Collections.Concurrent.ConcurrentDictionary<string, FakturaResultat>();
 
 // ── GET /health ──────────────────────────────────────────────────
 app.MapGet("/health", () => new { status = "ok", mode = azureMode ? "azure" : "demo" })
@@ -74,8 +85,32 @@ app.MapGet("/health", () => new { status = "ok", mode = azureMode ? "azure" : "d
 // ── POST /invoices ───────────────────────────────────────────────
 app.MapPost("/invoices", async (HttpRequest req) =>
 {
-    if (!req.HasFormContentType || req.Form.Files.Count == 0)
+    bool hasFiles;
+    try
+    {
+        hasFiles = req.HasFormContentType && req.Form.Files.Count > 0;
+    }
+    catch
+    {
+        hasFiles = false;
+    }
+
+    if (!hasFiles)
         return Results.BadRequest(new { fel = "Skicka filen som multipart/form-data (fält: file)" });
+
+    var file = req.Form.Files[0];
+
+    // ── Filvalidering ────────────────────────────────────────────
+    const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
+    if (file.Length > MaxFileSize)
+        return Results.BadRequest(new { fel = $"Filen är för stor. Max tillåten storlek är {MaxFileSize / 1024 / 1024} MB." });
+
+    var contentType = file.ContentType?.ToLowerInvariant() ?? "";
+    if (contentType != "application/pdf" && !contentType.StartsWith("image/"))
+        return Results.BadRequest(new { fel = "Filtypen stöds inte. Ladda upp en PDF eller bildfil (JPEG, PNG, TIFF)." });
+
+    if (file.Length == 0)
+        return Results.BadRequest(new { fel = "Filen är tom." });
 
     var id = Guid.NewGuid().ToString("N")[..8];
     FakturaResultat r;
@@ -87,11 +122,26 @@ app.MapPost("/invoices", async (HttpRequest req) =>
     }
     else
     {
-        using var stream = req.Form.Files[0].OpenReadStream();
-        var op  = await diClient.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", stream);
-        var doc = op.Value.Documents.FirstOrDefault();
-        r = ParseFaktura(doc, id);
-        await blobs!.UploadBlobAsync($"{id}.json", new BinaryData(JsonSerializer.Serialize(r)));
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var op  = await diClient.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", stream);
+            var doc = op.Value.Documents.FirstOrDefault();
+            r = ParseFaktura(doc, id);
+            await blobs!.UploadBlobAsync($"{id}.json", new BinaryData(JsonSerializer.Serialize(r)));
+        }
+        catch (RequestFailedException ex) when (ex.Status == 429)
+        {
+            return Results.Problem(
+                detail: "Document Intelligence-tjänsten är överbelastad. Försök igen om en stund.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+        catch (RequestFailedException ex)
+        {
+            return Results.Problem(
+                detail: $"Azure-anrop misslyckades: {ex.Message}",
+                statusCode: StatusCodes.Status502BadGateway);
+        }
     }
 
     fakturor[id] = r;
@@ -144,8 +194,21 @@ static FakturaResultat ParseFaktura(AnalyzedDocument? doc, string id)
 
         return 0m;
     }
+
+    // Läs valuta från Document Intelligence-svaret; fall back till SEK om det saknas
+    string GetCurrency()
+    {
+        if (!doc.Fields.TryGetValue("InvoiceTotal", out var f) || f.Value is null)
+            return "SEK";
+        if (f.FieldType == DocumentFieldType.Currency)
+        {
+            var code = f.Value.AsCurrency().Code;
+            return !string.IsNullOrWhiteSpace(code) ? code : "SEK";
+        }
+        return "SEK";
+    }
     
-    return new(id, Get("VendorName"), GetDec("InvoiceTotal"), Get("DueDate"), "SEK", "klar");
+    return new(id, Get("VendorName"), GetDec("InvoiceTotal"), Get("DueDate"), GetCurrency(), "klar");
 }
 
 // ── Modeller ─────────────────────────────────────────────────────
