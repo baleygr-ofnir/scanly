@@ -4,6 +4,20 @@ param environmentName string
 @description('The Azure region where resources will be deployed')
 param location string = resourceGroup().location
 
+@description('Minimum number of Container App replicas. 0 = scale-to-zero.')
+@minValue(0)
+param minReplicas int = 1
+
+@description('vCPU per replica.')
+param containerCpu string = '0.25'
+
+@description('Memory per replica.')
+param containerMemory string = '0.5Gi'
+
+@description('Storage account SKU for blob storage.')
+@allowed(['Standard_LRS', 'Standard_GRS', 'Standard_ZRS', 'Standard_RAGRS'])
+param storageSku string = 'Standard_LRS'
+
 @secure()
 param azureDiEndpoint string
 
@@ -23,6 +37,7 @@ module storage 'modules/storage.bicep' = {
   params: {
     location: location
     storageAccountName: storageName
+    storageSku: storageSku
   }
 }
 
@@ -41,7 +56,9 @@ module containerApp 'modules/containerapps.bicep' = {
     envName: envName
     appName: appName
     registryLoginServer: acr.outputs.registryLoginServer
-
+    minReplicas: minReplicas
+    containerCpu: containerCpu
+    containerMemory: containerMemory
   }
 }
 module keyVault 'modules/keyvault.bicep' = {
@@ -68,6 +85,9 @@ module containerAppSettings 'modules/containerapps.bicep' = {
     location: location
     registryLoginServer: acr.outputs.registryLoginServer
     keyVaultSecretUri: keyVault.outputs.keyVaultUri
+    minReplicas: minReplicas
+    containerCpu: containerCpu
+    containerMemory: containerMemory
   }
 }
 

@@ -37,54 +37,54 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v7
 
-    - name: Azure Login via OIDC
-      uses: azure/login@v3
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    
-    - name: Deploy Core Infrastructure
-      uses: azure/arm-deploy@v2
-      id: bicep-core
-      env:
-        AZURE_DI_ENDPOINT: ${{ secrets.AZURE_DI_ENDPOINT }}
-        AZURE_DI_KEY: ${{ secrets.AZURE_DI_KEY }}
-      with:
-        scope: resourcegroup
-        resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
-        template: ./bicep/main.bicep
-        parameters: ./bicep/parameters/${{ env.TARGET_ENV }}.bicepparam
-        failOnStdErr: false
+      - name: Azure Login via OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Set Image Reference Variable
-      run: |
-        echo "FULL_IMAGE_NAME=${{ steps.bicep-core.outputs.acrLoginServer }}/${{ vars.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
+      - name: Deploy Core Infrastructure
+        uses: azure/arm-deploy@v2
+        id: bicep-core
+        env:
+          AZURE_DI_ENDPOINT: ${{ secrets.AZURE_DI_ENDPOINT }}
+          AZURE_DI_KEY: ${{ secrets.AZURE_DI_KEY }}
+        with:
+          scope: resourcegroup
+          resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
+          template: ./bicep/main.bicep
+          parameters: ./bicep/parameters/${{ env.TARGET_ENV }}.bicepparam azureDiEndpoint=${{ secrets.AZURE_DI_ENDPOINT }} azureDiKey=${{ secrets.AZURE_DI_KEY }}
+          failOnStdErr: false
 
-    - name: Authenticate to ACR
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          ACR_NAME=$(echo '${{ steps.bicep-core.outputs.acrLoginServer }}' | cut -d'.' -f1)
-          az acr login --name $ACR_NAME
+      - name: Set Image Reference Variable
+        run: |
+          echo "FULL_IMAGE_NAME=${{ steps.bicep-core.outputs.acrLoginServer }}/${{ vars.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v4
+      - name: Authenticate to ACR
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            ACR_NAME=$(echo '${{ steps.bicep-core.outputs.acrLoginServer }}' | cut -d'.' -f1)
+            az acr login --name $ACR_NAME
 
-    - name: Build and Push .NET 10 API Image
-      uses: docker/build-push-action@v7
-      with:
-        context: ./api
-        push: true
-        tags: ${{ env.FULL_IMAGE_NAME }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
-    - name: Deploy Azure Container App
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          az containerapp update \
-            --name ca-scanly-api-${{ env.TARGET_ENV }} \
-            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.FULL_IMAGE_NAME }}
+      - name: Build and Push .NET 10 API Image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./api
+          push: true
+          tags: ${{ env.FULL_IMAGE_NAME }}
+
+      - name: Deploy Azure Container App
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az containerapp update \
+              --name ca-scanly-api-${{ env.TARGET_ENV }} \
+              --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+              --image ${{ env.FULL_IMAGE_NAME }}
