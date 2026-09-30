@@ -17,7 +17,7 @@
 
 - [x] Minst 4 endpoints implementerade och fungerande
 - [x] `GET /health` returnerar 200 OK
-- *[x] Scalar UI > Kika om problem
+- [x] Scalar UI > Kika om problem
 - [x] Alla endpoints dokumenterade (`.WithTags()` + `.Produces<T>()`)
 
 ### Azure-tjänst i fokus
@@ -48,7 +48,7 @@
 ### CI/CD (Azure DevOps)
 
 - [x] YAML-pipeline triggas automatiskt vid push till `main`
-- [ ] Pipeline-steg: build → test → push till ACR → deploy till Container Apps
+- [x] Pipeline-steg: build → test → push till ACR → deploy till Container Apps
 - [x] Grön pipeline = live app
 
 ### Säkerhet
@@ -82,8 +82,8 @@
 
 - [ ] **Autoskalning**: HTTP-baserade scaling rules (t.ex. >10 simultana requests)
 - [x] **Monitoring**: Application Insights + minst ett custom alert (t.ex. alert vid fel > 5%)
-- [ ] **Parametriserad Bicep**: parameter-fil för dev/prod (replicas, SKU osv.)
-- [ ] **Felhantering**: Tydliga API-svar + HTTP-statuskoder + loggning när Azure-tjänsten misslyckas
+- [x] **Parametriserad Bicep**: parameter-fil för dev/prod (replicas, SKU osv.)
+- [x] **Felhantering**: Tydliga API-svar + HTTP-statuskoder + loggning när Azure-tjänsten misslyckas
 - [ ] **Rollback**: Dokumenterad och demonstrerad (re-deploy av tidigare Container App revision)
 - [ ] **Välgrundade designval**: Presentationen diskuterar alternativ (varför Container Apps för just denna workload?)
 
@@ -91,9 +91,9 @@
 
 ## Leverabler
 
-- [ ] **Git-repo** (Azure DevOps eller GitHub) — länk till Marcus senast torsdag 1 okt kl. 23:59
+- [x] **Git-repo** (Azure DevOps eller GitHub) — länk till Marcus senast torsdag 1 okt kl. 23:59
 - [ ] **Presentation** (10/12/15 min) — fredag 2 okt online
-- [ ] **Commit-historik** — visar arbete, alla teammedlemmar har commits
+- [x] **Commit-historik** — visar arbete, alla teammedlemmar har commits
 - [ ] **RAPPORT.md** — kundrapport baserad på mallen
 - [ ] **REFLEKTION_[namn].md** — individuell reflektion per person
 
@@ -103,8 +103,8 @@
 
 **Längd**: 10 min (ensam) | 12 min (par) | 15 min (grupp 3–4)
 
-- [ ] Vad ni byggde och varför (1–2 min)
-- [ ] Arkitekturöversikt med diagram (2–3 min)
+- [x] Vad ni byggde och varför (1–2 min)
+- [x] Arkitekturöversikt med diagram (2–3 min)
 - [ ] **Live-demo**: push → pipeline → live API-anrop (3–4 min)
 - [ ] Ekonomi och skalning (1–2 min)
 - [ ] Vad gick fel och hur ni löste det (1–2 min)
