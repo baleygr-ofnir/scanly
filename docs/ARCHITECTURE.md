@@ -30,16 +30,16 @@ Lösningen bygger på "Zero-Trust" och minimerar hanteringen av hemligheter:
 - **Azure Key Vault & Managed Identity**: Applikationen hämtar känslig information från Azure Key Vault under runtime. Åtkomsten hanteras via **System-Assigned Managed Identity**, vilket innebär att tjänsterna (Container Apps, Storage, Key Vault, ACR) litar på varandra internt via Azure Entra ID, helt utan att vi behöver skapa och skicka runt lösenord.
 
 ## 5. Ekonomi med faktiska siffror
-Enligt vår uppskattade budgetkalkyl baserad på Azure Pricing Calculator (se `scanly-estimate.md` för detaljer) är den förväntade månadskostnaden för en fullskalig produktionsmiljö följande (räknat per månad i regionen West Europe):
+Nedan presenteras en uppskattad budgetkalkyl baserad på Azure Pricing Calculator (räknat per månad i regionen West Europe). Kalkylen är nedskalad till en beräknad volym för **30 kunder** (ca 15% av originalestimatet på 200 kunder).
 
-| Tjänst | Detaljer | Estimerad Kostnad (SEK/månad) |
+| Tjänst | Konfiguration / Beskrivning | Estimerad månadskostnad (SEK) |
 | :--- | :--- | :--- |
-| **Azure Container Apps** | Consumption Plan, 0.4 milj anrop, 3 min-replikor | 450.30 kr |
+| **Azure Container Apps** | Consumption Plan, ~60 000 anrop, 3 min-replikor | ~375.00 kr |
 | **Azure Container Registry** | Basic Tier | 57.10 kr |
-| **Storage Accounts** | Block Blob Storage, ZRS, 25 GB lagring | 14.22 kr |
-| **Key Vault** | 100 000 operationer | 2.86 kr |
-| **Azure Document Intelligence**| S0-instans: 100 000 Pre-built sidor | 9 519.20 kr |
-| **Total Månadskostnad** | | **10 043.67 kr** |
+| **Storage Accounts** | Block Blob Storage, ZRS, låg lagring | ~5.00 kr |
+| **Key Vault** | ~15 000 operationer | ~0.50 kr |
+| **Azure Document Intelligence**| S0-instans: 15 000 Pre-built sidor | 1 427.88 kr |
+| **Totalt** | | **~1 865.48 kr** |
 
 *Notera gällande labb-budgeten på 500 SEK:* 
-Denna kalkyl baseras på **100 000 bearbetade sidor i Document Intelligence**. För att hålla oss inom vår faktiska labb-budget på 500 SEK per person kommer vi under labben att hantera en extremt liten bråkdel av denna volym. Dessutom stänger vi ner tjänsterna ("Stäng ner resurser") efter labben, varför vi inte kommer att överstiga de tillåtna 500 kronorna.
+Denna kalkyl baseras på **15 000 bearbetade sidor**. För att hålla oss inom vår labb-budget på 500 SEK per person stänger vi ner tjänsterna ("Stäng ner resurser") efter labben och testar med en extremt liten bråkdel av denna volym, varför vi inte kommer att överstiga de tillåtna 500 kronorna.

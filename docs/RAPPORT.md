@@ -113,16 +113,16 @@ De 10 testerna körs i demo-läge utan Azure-uppkoppling och täcker validering,
 | **Azure-anrop saknar automatiska tester** | Medel | Lägg till enhetstester med mockade klienter för 429-fallet och `ParseFaktura`. |
 
 ## Kostnadskalkyl
-*(Beräknat enligt vår uppdaterade Azure Infrastruktur Kostnadskalkyl i `scanly-estimate.md`, baserad på Azure Pricing Calculator för region West Europe.)*
+*(Beräknat för en lanseringsvolym med **30 kunder**, baserat på vår Azure Infrastruktur Kostnadskalkyl nedskalad från 200 kunder. Region West Europe.)*
 
-| Resurs | Konfiguration / Beskrivning | Estimerad månadskostnad (SEK) |
+| Tjänst | Konfiguration / Beskrivning | Estimerad månadskostnad (SEK) |
 | :--- | :--- | :--- |
-| **Azure Container Apps** | Consumption Plan, 0.4 milj anrop, 3 min-replikor | 450.30 kr |
+| **Azure Container Apps** | Consumption Plan, ~60 000 anrop, 3 min-replikor | ~375.00 kr |
 | **Azure Container Registry** | Basic Tier | 57.10 kr |
-| **Storage Accounts** | Block Blob Storage, ZRS, 25 GB lagring | 14.22 kr |
-| **Key Vault** | 100 000 operationer | 2.86 kr |
-| **Azure Document Intelligence**| S0-instans: 100 000 Pre-built sidor | 9 519.20 kr |
-| **Totalt** | | **10 043.67 kr** |
+| **Storage Accounts** | Block Blob Storage, ZRS, låg lagring | ~5.00 kr |
+| **Key Vault** | ~15 000 operationer | ~0.50 kr |
+| **Azure Document Intelligence**| S0-instans: 15 000 Pre-built sidor | 1 427.88 kr |
+| **Totalt** | | **~1 865.48 kr** |
 
 Container Apps-kostnaden är i princip fast, eftersom tre repliker alltid är igång. Den rörliga kostnaden är Document Intelligence, som kostar ca 0,20 kr per analyserad faktura på 2 sidor. Log Analytics (loggar från Container Apps) bedöms rymmas inom gratisgränsen vid denna volym. Till jämförelse blir test-miljön (en replika) ca 120 kr/mån i beräkningskostnad, och dev-miljön nära 0 kr tack vare scale-to-zero.
 
@@ -147,4 +147,5 @@ Om trafiken ökar markant är den primära flaskhalsen **Azure Document Intellig
 | **Denna rapport** | `RAPPORT.md` i repots rot |
 
 *Rapporten är upprättad av konsultteamet som ett avslutande leveransdokument.*
+
 
