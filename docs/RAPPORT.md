@@ -113,17 +113,16 @@ De 10 testerna körs i demo-läge utan Azure-uppkoppling och täcker validering,
 | **Azure-anrop saknar automatiska tester** | Medel | Lägg till enhetstester med mockade klienter för 429-fallet och `ParseFaktura`. |
 
 ## Kostnadskalkyl
-*(Beräknat för produktionsmiljön vid lansering med **10 kunder × 200 analyser per månad = 2 000 analyser**, i snitt 2 sidor per faktura = 4 000 sidor. Region West Europe, 1 USD ≈ 10 kr. Källa: Azure Pricing Calculator.)*
+*(Beräknat enligt vår uppdaterade Azure Infrastruktur Kostnadskalkyl i `scanly-estimate.md`, baserad på Azure Pricing Calculator för region West Europe.)*
 
-| Resurs | SKU | Uppskattad kostnad/mån |
+| Resurs | Konfiguration / Beskrivning | Estimerad månadskostnad (SEK) |
 | :--- | :--- | :--- |
-| **Container Apps Environment** | Consumption | 0 kr |
-| **Azure Container Apps** | Consumption, 3 repliker × 0,5 vCPU / 1 Gi (alltid igång) | ca 360 kr |
-| **Azure Container Registry** | Basic | ca 50 kr |
-| **Azure Blob Storage** | Standard GRS (endast små JSON-resultat) | < 5 kr |
-| **Azure Document Intelligence** | S0 (Standard), prebuilt-invoice | ca 400 kr |
-| **Azure Key Vault** | Standard | < 1 kr |
-| **Totalt** | | **ca 810 kr/mån** |
+| **Azure Container Apps** | Consumption Plan, 0.4 milj anrop, 3 min-replikor | 450.30 kr |
+| **Azure Container Registry** | Basic Tier | 57.10 kr |
+| **Storage Accounts** | Block Blob Storage, ZRS, 25 GB lagring | 14.22 kr |
+| **Key Vault** | 100 000 operationer | 2.86 kr |
+| **Azure Document Intelligence**| S0-instans: 100 000 Pre-built sidor | 9 519.20 kr |
+| **Totalt** | | **10 043.67 kr** |
 
 Container Apps-kostnaden är i princip fast, eftersom tre repliker alltid är igång. Den rörliga kostnaden är Document Intelligence, som kostar ca 0,20 kr per analyserad faktura på 2 sidor. Log Analytics (loggar från Container Apps) bedöms rymmas inom gratisgränsen vid denna volym. Till jämförelse blir test-miljön (en replika) ca 120 kr/mån i beräkningskostnad, och dev-miljön nära 0 kr tack vare scale-to-zero.
 
@@ -148,3 +147,4 @@ Om trafiken ökar markant är den primära flaskhalsen **Azure Document Intellig
 | **Denna rapport** | `RAPPORT.md` i repots rot |
 
 *Rapporten är upprättad av konsultteamet som ett avslutande leveransdokument.*
+

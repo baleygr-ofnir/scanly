@@ -30,16 +30,16 @@ Lösningen bygger på "Zero-Trust" och minimerar hanteringen av hemligheter:
 - **Azure Key Vault & Managed Identity**: Applikationen hämtar känslig information från Azure Key Vault under runtime. Åtkomsten hanteras via **System-Assigned Managed Identity**, vilket innebär att tjänsterna (Container Apps, Storage, Key Vault, ACR) litar på varandra internt via Azure Entra ID, helt utan att vi behöver skapa och skicka runt lösenord.
 
 ## 5. Ekonomi med faktiska siffror
-En uppskattad budgetkalkyl baserad på Azure Pricing Calculator (räknat per månad i regionen West Europe). Budgetkravet är max 500 SEK per person:
+Enligt vår uppskattade budgetkalkyl baserad på Azure Pricing Calculator (se `scanly-estimate.md` för detaljer) är den förväntade månadskostnaden för en fullskalig produktionsmiljö följande (räknat per månad i regionen West Europe):
 
-| Tjänst | Detaljer | Uppskattad Kostnad (SEK/månad) |
+| Tjänst | Detaljer | Estimerad Kostnad (SEK/månad) |
 | :--- | :--- | :--- |
-| **Azure Container Apps** | Consumption Plan. Min-replicas: 2 (0.5 vCPU, 1 GB RAM). Antar låg-till-medel aktiv användning. | ~120 - 150 SEK |
-| **Azure Container Registry** | Basic SKU (innehåller 10 GB lagring). | ~55 SEK |
-| **Azure Storage Account** | Standard LRS (General Purpose v2). Extremt låg lagringsvolym och få transaktioner. | ~5 SEK |
-| **Azure Key Vault** | Standard Tier. Få operationer per månad (några ören per 10 000 operationer). | < 2 SEK |
-| **Azure Document Intelligence** | Pay-as-you-go (S0 Tier). ~1000 sidor per månad. (*Gratisnivån F0 är tillgänglig vid behov*). | ~100 SEK |
-| **Log Analytics (App Insights)** | Pay-as-you-go. Några hundra MB injest. | ~20 SEK |
-| **Total Månadskostnad** | | **~302 - 332 SEK** |
+| **Azure Container Apps** | Consumption Plan, 0.4 milj anrop, 3 min-replikor | 450.30 kr |
+| **Azure Container Registry** | Basic Tier | 57.10 kr |
+| **Storage Accounts** | Block Blob Storage, ZRS, 25 GB lagring | 14.22 kr |
+| **Key Vault** | 100 000 operationer | 2.86 kr |
+| **Azure Document Intelligence**| S0-instans: 100 000 Pre-built sidor | 9 519.20 kr |
+| **Total Månadskostnad** | | **10 043.67 kr** |
 
-Den totala kostnaden ryms med god marginal inom budgeten på 500 SEK per person för labbens genomförande. Eftersom det är en Consumption-baserad modell kan kostnaderna hållas ännu lägre om Container App konfigureras att skala ner till noll (min-replicas: 0) när den inte används, eller genom att tjänsterna stängs ner ("Stäng ner resurser") efter labben.
+*Notera gällande labb-budgeten på 500 SEK:* 
+Denna kalkyl baseras på **100 000 bearbetade sidor i Document Intelligence**. För att hålla oss inom vår faktiska labb-budget på 500 SEK per person kommer vi under labben att hantera en extremt liten bråkdel av denna volym. Dessutom stänger vi ner tjänsterna ("Stäng ner resurser") efter labben, varför vi inte kommer att överstiga de tillåtna 500 kronorna.
